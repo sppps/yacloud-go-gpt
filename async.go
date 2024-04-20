@@ -33,11 +33,16 @@ type asyncOperation struct {
 
 func (s YandexGptRestAsync) Completion(req CompletionRequest) (res CompletionResponse, err error) {
 	op, err := s.CompletionAsync(req)
+	if err != nil {
+		return res, err
+	}
 	for !op.Done {
 		time.Sleep(durationOrDefault(s.OperationCheckInterval, 1500*time.Millisecond))
 		op, err = s.GetOperationResult(op.Id)
+		if err != nil {
+			return res, err
+		}
 	}
-	s.Logger.Println(op.Response)
 	return res, err
 }
 
@@ -63,7 +68,6 @@ func (s YandexGptRestAsync) CompletionAsync(req CompletionRequest) (res asyncOpe
 
 func (s YandexGptRestAsync) GetOperationResult(id string) (res asyncOperation, err error) {
 	url := fmt.Sprintf("https://llm.api.cloud.yandex.net/operations/%s", id)
-	fmt.Println(url)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
