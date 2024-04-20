@@ -67,7 +67,7 @@ func (s YandexGptRestAsync) CompletionAsync(req CompletionRequest) (res asyncOpe
 
 func (s YandexGptRestAsync) GetOperationResult(id string) (res asyncOperation, err error) {
 	res, err = callRestApi[asyncOperation](restApiCall{
-		BaseUrl:  "/operations/",
+		BaseUrl:  "https://llm.api.cloud.yandex.net/operations",
 		Endpoint: id,
 		Method:   "GET",
 		ApiKey:   s.ApiKey,

@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+const defaultBaseUrl = "https://llm.api.cloud.yandex.net/foundationModels/v1"
+
 func stringOrDefault(s1, s2 string) string {
 	if len(s1) > 0 {
 		return s1

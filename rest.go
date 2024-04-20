@@ -13,8 +13,6 @@ type YandexGptRest struct {
 	BaseUrl  string
 }
 
-const defaultBaseUrl = "https://llm.api.cloud.yandex.net/foundationModels/v1/"
-
 type apiError struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
