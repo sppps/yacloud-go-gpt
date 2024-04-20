@@ -13,7 +13,7 @@ type YandexGptRest struct {
 	BaseUrl  string
 }
 
-const defaultBaseUrl = "https://llm.api.cloud.yandex.net/foundationModels/v1"
+const defaultBaseUrl = "https://llm.api.cloud.yandex.net/foundationModels/v1/"
 
 type apiError struct {
 	Code    int    `json:"code"`
@@ -34,7 +34,7 @@ func (s YandexGptRest) formatModelUri(uri ModelUri) ModelUri {
 
 func (s YandexGptRest) Completion(req CompletionRequest) (res CompletionResponse, err error) {
 	req.ModelUri = s.formatModelUri(req.ModelUri)
-	_, err = callRestApi(restApiCall{
+	res, err = callRestApi[CompletionResponse](restApiCall{
 		Method:   "completion",
 		ApiKey:   s.ApiKey,
 		IAMToken: s.IAMToken,

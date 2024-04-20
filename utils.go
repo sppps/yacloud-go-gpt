@@ -26,6 +26,7 @@ func durationOrDefault(d1, d2 time.Duration) time.Duration {
 
 type restApiCall struct {
 	Method   string
+	Endpoint string
 	Params   any
 	BaseUrl  string
 	Logger   *log.Logger
@@ -33,25 +34,29 @@ type restApiCall struct {
 	IAMToken string
 }
 
-func callRestApi(req restApiCall) ([]byte, error) {
-	url := fmt.Sprintf("%s/%s", stringOrDefault(req.BaseUrl, defaultBaseUrl), req.Method)
+func callRestApi[T any](req restApiCall) (res T, err error) {
+	url := fmt.Sprintf("%s/%s", stringOrDefault(req.BaseUrl, defaultBaseUrl), req.Endpoint)
 
 	if req.Logger != nil {
 		req.Logger.Printf("yacloud translate: %s", url)
 	}
 
-	body, err := json.Marshal(req.Params)
-	if err != nil {
-		return nil, err
+	var bodyBuf io.Reader
+	if req.Params != nil {
+		body, err := json.Marshal(req.Params)
+		if err != nil {
+			return res, err
+		}
+
+		if req.Logger != nil {
+			req.Logger.Printf("yacloud translate: %s", string(body))
+		}
+		bodyBuf = bytes.NewBuffer(body)
 	}
 
-	if req.Logger != nil {
-		req.Logger.Printf("yacloud translate: %s", string(body))
-	}
-
-	rreq, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
+	rreq, err := http.NewRequest(stringOrDefault(req.Method, "POST"), url, bodyBuf)
 	if err != nil {
-		return nil, err
+		return res, err
 	}
 
 	rreq.Header.Set("content-type", "application/json")
@@ -64,13 +69,13 @@ func callRestApi(req restApiCall) ([]byte, error) {
 	client := http.Client{}
 	resp, err := client.Do(rreq)
 	if err != nil {
-		return nil, err
+		return res, err
 	}
 	defer resp.Body.Close()
 
 	d, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return res, err
 	}
 
 	if req.Logger != nil {
@@ -81,10 +86,11 @@ func callRestApi(req restApiCall) ([]byte, error) {
 		var apiError apiError
 		err = json.Unmarshal(d, &apiError)
 		if err != nil {
-			return nil, err
+			return res, err
 		}
-		return nil, fmt.Errorf("api error %d: %s", apiError.Code, apiError.Message)
+		return res, fmt.Errorf("api error %d: %s", apiError.Code, apiError.Message)
 	}
 
-	return d, err
+	err = json.Unmarshal(d, &res)
+	return res, err
 }
