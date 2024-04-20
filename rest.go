@@ -2,10 +2,15 @@ package yacloud_gpt
 
 import (
 	"fmt"
+	"log"
 )
 
 type YandexGptRest struct {
-	restApiCaller
+	FolderId string
+	ApiKey   string
+	IAMToken string
+	Logger   *log.Logger
+	BaseUrl  string
 }
 
 const defaultBaseUrl = "https://llm.api.cloud.yandex.net/foundationModels/v1"
@@ -29,9 +34,16 @@ func (s YandexGptRest) formatModelUri(uri ModelUri) ModelUri {
 
 func (s YandexGptRest) Completion(req CompletionRequest) (res CompletionResponse, err error) {
 	req.ModelUri = s.formatModelUri(req.ModelUri)
-	_, err = s.callRestApi("completion", completionReq{
-		CompletionRequest: req,
-		FolderId:          s.FolderId,
+	_, err = callRestApi(restApiCall{
+		Method:   "completion",
+		ApiKey:   s.ApiKey,
+		IAMToken: s.IAMToken,
+		BaseUrl:  s.BaseUrl,
+		Logger:   s.Logger,
+		Params: completionReq{
+			CompletionRequest: req,
+			FolderId:          s.FolderId,
+		},
 	})
 	return res, err
 }

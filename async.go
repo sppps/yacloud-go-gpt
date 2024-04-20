@@ -13,10 +13,9 @@ type YandexGptRestAsync struct {
 	FolderId               string
 	ApiKey                 string
 	IAMToken               string
-	BaseUrl                string
 	Logger                 *log.Logger
+	BaseUrl                string
 	OperationCheckInterval time.Duration
-	restApiCaller
 }
 
 type asyncOperation struct {
@@ -55,9 +54,16 @@ func (s YandexGptRestAsync) formatModelUri(uri ModelUri) ModelUri {
 
 func (s YandexGptRestAsync) CompletionAsync(req CompletionRequest) (res asyncOperation, err error) {
 	req.ModelUri = s.formatModelUri(req.ModelUri)
-	d, err := s.callRestApi("completionAsync", completionReq{
-		CompletionRequest: req,
-		FolderId:          s.FolderId,
+	d, err := callRestApi(restApiCall{
+		Method:   "completionAsync",
+		ApiKey:   s.ApiKey,
+		IAMToken: s.IAMToken,
+		BaseUrl:  s.BaseUrl,
+		Logger:   s.Logger,
+		Params: completionReq{
+			CompletionRequest: req,
+			FolderId:          s.FolderId,
+		},
 	})
 	if err != nil {
 		return res, err

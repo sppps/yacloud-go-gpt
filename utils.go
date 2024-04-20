@@ -24,44 +24,45 @@ func durationOrDefault(d1, d2 time.Duration) time.Duration {
 	return d2
 }
 
-type restApiCaller struct {
+type restApiCall struct {
+	Method   string
+	Params   any
 	BaseUrl  string
 	Logger   *log.Logger
-	FolderId string
 	ApiKey   string
 	IAMToken string
 }
 
-func (s restApiCaller) callRestApi(method string, params any) ([]byte, error) {
-	url := fmt.Sprintf("%s/%s", stringOrDefault(s.BaseUrl, defaultBaseUrl), method)
+func callRestApi(req restApiCall) ([]byte, error) {
+	url := fmt.Sprintf("%s/%s", stringOrDefault(req.BaseUrl, defaultBaseUrl), req.Method)
 
-	if s.Logger != nil {
-		s.Logger.Printf("yacloud translate: %s", url)
+	if req.Logger != nil {
+		req.Logger.Printf("yacloud translate: %s", url)
 	}
 
-	body, err := json.Marshal(params)
+	body, err := json.Marshal(req.Params)
 	if err != nil {
 		return nil, err
 	}
 
-	if s.Logger != nil {
-		s.Logger.Printf("yacloud translate: %s", string(body))
+	if req.Logger != nil {
+		req.Logger.Printf("yacloud translate: %s", string(body))
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
+	rreq, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("content-type", "application/json")
-	if len(s.ApiKey) > 0 {
-		req.Header.Set("authorization", fmt.Sprintf("Api-Key %s", s.ApiKey))
-	} else if len(s.IAMToken) > 0 {
-		req.Header.Set("authorization", fmt.Sprintf("Bearer %s", s.IAMToken))
+	rreq.Header.Set("content-type", "application/json")
+	if len(req.ApiKey) > 0 {
+		rreq.Header.Set("authorization", fmt.Sprintf("Api-Key %s", req.ApiKey))
+	} else if len(req.IAMToken) > 0 {
+		rreq.Header.Set("authorization", fmt.Sprintf("Bearer %s", req.IAMToken))
 	}
 
 	client := http.Client{}
-	resp, err := client.Do(req)
+	resp, err := client.Do(rreq)
 	if err != nil {
 		return nil, err
 	}
@@ -72,8 +73,8 @@ func (s restApiCaller) callRestApi(method string, params any) ([]byte, error) {
 		return nil, err
 	}
 
-	if s.Logger != nil {
-		s.Logger.Printf("yacloud translate: %s", string(d))
+	if req.Logger != nil {
+		req.Logger.Printf("yacloud translate: %s", string(d))
 	}
 
 	if resp.StatusCode != http.StatusOK {
