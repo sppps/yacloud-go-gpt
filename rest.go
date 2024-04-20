@@ -33,7 +33,7 @@ func (s YandexGptRest) formatModelUri(uri ModelUri) ModelUri {
 func (s YandexGptRest) Completion(req CompletionRequest) (res CompletionResponse, err error) {
 	req.ModelUri = s.formatModelUri(req.ModelUri)
 	res, err = callRestApi[CompletionResponse](restApiCall{
-		Method:   "completion",
+		Endpoint: "completion",
 		ApiKey:   s.ApiKey,
 		IAMToken: s.IAMToken,
 		BaseUrl:  s.BaseUrl,

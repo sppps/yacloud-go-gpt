@@ -39,7 +39,7 @@ func (s YandexGptRestAsync) Completion(req CompletionRequest) (res CompletionRes
 			return res, err
 		}
 	}
-	return res, err
+	return op.Response, err
 }
 
 func (s YandexGptRestAsync) formatModelUri(uri ModelUri) ModelUri {
