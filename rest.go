@@ -24,7 +24,7 @@ type completionReq struct {
 	FolderId string `json:"folder_id"`
 }
 
-func (s YandexGptRest) Completion(ctx context.Context, req CompletionRequest) (res CompletionResponse, err error) {
+func (s YandexGptRest) Completion(req CompletionRequest) (res CompletionResponse, err error) {
 	return s.CompletionWithContext(context.Background(), req)
 }
 
