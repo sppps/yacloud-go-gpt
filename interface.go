@@ -12,14 +12,6 @@ type YandexGptTokenizer interface {
 	TokenizeCompletion()
 }
 
-type ModelUri string
-
-const (
-	YandexGptPro           ModelUri = "yandexgpt"
-	YandexGptLite          ModelUri = "yandexgpt-lite"
-	YandexGptSummarization ModelUri = "summarization"
-)
-
 type MessageRole string
 
 const (
@@ -29,7 +21,7 @@ const (
 )
 
 type CompletionRequest struct {
-	ModelUri          ModelUri            `json:"modelUri,omitempty"`
+	ModelUri          string              `json:"modelUri,omitempty"`
 	CompletionOptions *CompletionOptions  `json:"completionOptions,omitempty"`
 	Messages          []CompletionMessage `json:"messages"`
 }

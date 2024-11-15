@@ -47,15 +47,8 @@ func (s YandexGptRestAsync) CompletionWithContext(ctx context.Context, req Compl
 	return op.Response, err
 }
 
-func (s YandexGptRestAsync) formatModelUri(uri ModelUri) ModelUri {
-	if uri == YandexGptPro || uri == YandexGptLite || uri == YandexGptSummarization {
-		return ModelUri(fmt.Sprintf("gpt://%s/%s/latest", s.FolderId, uri))
-	}
-	return uri
-}
-
 func (s YandexGptRestAsync) completionAsync(ctx context.Context, req CompletionRequest) (res asyncOperation, err error) {
-	req.ModelUri = s.formatModelUri(req.ModelUri)
+	req.ModelUri = fmt.Sprintf("gpt://%s/%s", s.FolderId, req.ModelUri)
 	res, err = callRestApi[asyncOperation](ctx, restApiCall{
 		Endpoint: "completionAsync",
 		ApiKey:   s.ApiKey,

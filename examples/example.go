@@ -15,7 +15,7 @@ func main() {
 		Logger:   log.Default(),
 	}
 	resp, err := gpt.Completion(yacloud_gpt.CompletionRequest{
-		ModelUri: yacloud_gpt.YandexGptPro,
+		ModelUri: "yandexgpt-lite/rc",
 		Messages: []yacloud_gpt.CompletionMessage{
 			{
 				Role: yacloud_gpt.ModeSystem,
