@@ -24,13 +24,17 @@ type completionReq struct {
 	FolderId string `json:"folder_id"`
 }
 
+type completionResp struct {
+	Result CompletionResponse `json:"result"`
+}
+
 func (s YandexGptRest) Completion(req CompletionRequest) (res CompletionResponse, err error) {
 	return s.CompletionWithContext(context.Background(), req)
 }
 
 func (s YandexGptRest) CompletionWithContext(ctx context.Context, req CompletionRequest) (res CompletionResponse, err error) {
 	req.ModelUri = fmt.Sprintf("gpt://%s/%s", s.FolderId, req.ModelUri)
-	res, err = callRestApi[CompletionResponse](ctx, restApiCall{
+	result, err := callRestApi[completionResp](ctx, restApiCall{
 		Endpoint: "completion",
 		ApiKey:   s.ApiKey,
 		IAMToken: s.IAMToken,
@@ -41,5 +45,5 @@ func (s YandexGptRest) CompletionWithContext(ctx context.Context, req Completion
 			FolderId:          s.FolderId,
 		},
 	})
-	return res, err
+	return result.Result, err
 }
