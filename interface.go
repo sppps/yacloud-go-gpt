@@ -1,7 +1,10 @@
 package yacloud_gpt
 
+import "context"
+
 type YandexGpt interface {
 	Completion(req CompletionRequest) (CompletionResponse, error)
+	CompletionWithContext(ctx context.Context, req CompletionRequest) (CompletionResponse, error)
 }
 
 type YandexGptTokenizer interface {

@@ -1,6 +1,7 @@
 package yacloud_gpt
 
 import (
+	"context"
 	"fmt"
 	"log"
 )
@@ -30,9 +31,13 @@ func (s YandexGptRest) formatModelUri(uri ModelUri) ModelUri {
 	return uri
 }
 
-func (s YandexGptRest) Completion(req CompletionRequest) (res CompletionResponse, err error) {
+func (s YandexGptRest) Completion(ctx context.Context, req CompletionRequest) (res CompletionResponse, err error) {
+	return s.CompletionWithContext(context.Background(), req)
+}
+
+func (s YandexGptRest) CompletionWithContext(ctx context.Context, req CompletionRequest) (res CompletionResponse, err error) {
 	req.ModelUri = s.formatModelUri(req.ModelUri)
-	res, err = callRestApi[CompletionResponse](restApiCall{
+	res, err = callRestApi[CompletionResponse](ctx, restApiCall{
 		Endpoint: "completion",
 		ApiKey:   s.ApiKey,
 		IAMToken: s.IAMToken,

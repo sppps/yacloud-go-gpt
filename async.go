@@ -1,6 +1,7 @@
 package yacloud_gpt
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
@@ -28,13 +29,17 @@ type asyncOperation struct {
 }
 
 func (s YandexGptRestAsync) Completion(req CompletionRequest) (res CompletionResponse, err error) {
-	op, err := s.CompletionAsync(req)
+	return s.CompletionWithContext(context.Background(), req)
+}
+
+func (s YandexGptRestAsync) CompletionWithContext(ctx context.Context, req CompletionRequest) (res CompletionResponse, err error) {
+	op, err := s.completionAsync(ctx, req)
 	if err != nil {
 		return res, err
 	}
-	for !op.Done {
+	for !op.Done && ctx.Err() == nil {
 		time.Sleep(durationOrDefault(s.OperationCheckInterval, 1500*time.Millisecond))
-		op, err = s.GetOperationResult(op.Id)
+		op, err = s.getOperationResult(ctx, op.Id)
 		if err != nil {
 			return res, err
 		}
@@ -49,9 +54,9 @@ func (s YandexGptRestAsync) formatModelUri(uri ModelUri) ModelUri {
 	return uri
 }
 
-func (s YandexGptRestAsync) CompletionAsync(req CompletionRequest) (res asyncOperation, err error) {
+func (s YandexGptRestAsync) completionAsync(ctx context.Context, req CompletionRequest) (res asyncOperation, err error) {
 	req.ModelUri = s.formatModelUri(req.ModelUri)
-	res, err = callRestApi[asyncOperation](restApiCall{
+	res, err = callRestApi[asyncOperation](ctx, restApiCall{
 		Endpoint: "completionAsync",
 		ApiKey:   s.ApiKey,
 		IAMToken: s.IAMToken,
@@ -65,8 +70,8 @@ func (s YandexGptRestAsync) CompletionAsync(req CompletionRequest) (res asyncOpe
 	return res, err
 }
 
-func (s YandexGptRestAsync) GetOperationResult(id string) (res asyncOperation, err error) {
-	res, err = callRestApi[asyncOperation](restApiCall{
+func (s YandexGptRestAsync) getOperationResult(ctx context.Context, id string) (res asyncOperation, err error) {
+	res, err = callRestApi[asyncOperation](ctx, restApiCall{
 		BaseUrl:  "https://llm.api.cloud.yandex.net/operations",
 		Endpoint: id,
 		Method:   "GET",

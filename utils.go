@@ -2,6 +2,7 @@ package yacloud_gpt
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -36,7 +37,7 @@ type restApiCall struct {
 	IAMToken string
 }
 
-func callRestApi[T any](req restApiCall) (res T, err error) {
+func callRestApi[T any](ctx context.Context, req restApiCall) (res T, err error) {
 	url := fmt.Sprintf("%s/%s", stringOrDefault(req.BaseUrl, defaultBaseUrl), req.Endpoint)
 
 	if req.Logger != nil {
@@ -57,6 +58,7 @@ func callRestApi[T any](req restApiCall) (res T, err error) {
 	}
 
 	rreq, err := http.NewRequest(stringOrDefault(req.Method, "POST"), url, bodyBuf)
+	rreq = rreq.WithContext(ctx)
 	if err != nil {
 		return res, err
 	}
